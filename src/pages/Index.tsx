@@ -396,7 +396,7 @@ export default function Index() {
             <div className="space-y-4">
               {[
                 { icon: "MapPin", label: "Адрес", value: "Волгоград, Кировский р-н, Гжатский пер., 19", color: "bg-lemon/20 text-lemon-dark" },
-                { icon: "Phone", label: "Телефон", value: "+7 (999) 123-45-67", color: "bg-emerald/20 text-emerald-dark" },
+                { icon: "Phone", label: "Телефон", value: "+7 (996) 492-52-46", color: "bg-emerald/20 text-emerald-dark" },
                 { icon: "Clock", label: "Часы работы", value: "Пн–Вс: 10:00 – 22:00", color: "bg-orange-100 text-orange-500" },
                 { icon: "Instagram", label: "Instagram", value: "@lemonade_fon", color: "bg-pink-100 text-pink-500" },
               ].map(({ icon, label, value, color }) => (
