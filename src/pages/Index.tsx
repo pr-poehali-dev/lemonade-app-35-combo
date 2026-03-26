@@ -399,6 +399,8 @@ export default function Index() {
                 { icon: "Phone", label: "Телефон", value: "+7 (996) 492-52-46", color: "bg-emerald/20 text-emerald-dark", href: "tel:+79964925246" },
                 { icon: "Clock", label: "Часы работы", value: "Пн–Вс: 10:00 – 22:00", color: "bg-orange-100 text-orange-500", href: null },
                 { icon: "Instagram", label: "Instagram", value: "@lemonade_fon", color: "bg-pink-100 text-pink-500", href: null },
+                { icon: "MessageCircle", label: "WhatsApp", value: "Написать в WhatsApp", color: "bg-green-100 text-green-600", href: "https://wa.me/79964925246" },
+                { icon: "Send", label: "Telegram", value: "Написать в Telegram", color: "bg-sky-100 text-sky-500", href: "https://t.me/+79964925246" },
               ].map(({ icon, label, value, color, href }) => (
                 <div key={label} className="animate-fade-in-up bg-white rounded-2xl p-5 border border-yellow-100 shadow-sm flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center flex-shrink-0`}>
