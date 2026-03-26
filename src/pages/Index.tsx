@@ -5,6 +5,7 @@ import MenuSection from "@/components/MenuSection";
 import CartSection from "@/components/CartSection";
 import ContactsSection from "@/components/ContactsSection";
 import OrdersSection, { type Order } from "@/components/OrdersSection";
+import { useEffect, useRef } from "react";
 
 function generateCode() {
   return String(Math.floor(10000 + Math.random() * 90000));
@@ -16,6 +17,7 @@ export default function Index() {
   const [cartBounce, setCartBounce] = useState(false);
   const [addedId, setAddedId] = useState<number | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const statusTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const totalQty = cart.reduce((s, i) => s + i.qty, 0);
 
@@ -41,24 +43,47 @@ export default function Index() {
     ));
   };
 
+  const updateOrderStatus = (code: string, status: Order["status"]) => {
+    setOrders((prev) => prev.map((o) => o.code === code ? { ...o, status } : o));
+  };
+
   const placeOrder = (payment: "cash" | "transfer") => {
     const now = new Date();
     const total = cart.reduce((s, i) => {
       const p = PRODUCTS.find((pr) => pr.id === i.productId);
       return s + (p?.price || 0) * i.qty;
     }, 0);
+    const code = generateCode();
     const order: Order = {
-      code: generateCode(),
+      code,
       items: [...cart],
       total,
       payment,
       createdAt: now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) + ", " +
         now.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }),
+      status: "preparing",
     };
     setOrders((prev) => [...prev, order]);
     setCart([]);
     setSection("orders");
+    statusTimers.current[code] = setTimeout(() => {
+      updateOrderStatus(code, "ready");
+      statusTimers.current[code] = setTimeout(() => {
+        updateOrderStatus(code, "done");
+      }, 30000);
+    }, 60000);
   };
+
+  const cancelOrder = (code: string) => {
+    clearTimeout(statusTimers.current[code]);
+    delete statusTimers.current[code];
+    updateOrderStatus(code, "cancelled");
+  };
+
+  useEffect(() => {
+    const timers = statusTimers.current;
+    return () => { Object.values(timers).forEach(clearTimeout); };
+  }, []);
 
   return (
     <div className="min-h-screen font-golos" style={{ background: "linear-gradient(135deg, #FFFDE7 0%, #F0FFF4 100%)" }}>
@@ -124,7 +149,7 @@ export default function Index() {
           />
         )}
         {section === "orders" && (
-          <OrdersSection orders={orders} onGoToMenu={() => setSection("menu")} />
+          <OrdersSection orders={orders} onGoToMenu={() => setSection("menu")} onCancelOrder={cancelOrder} />
         )}
         {section === "contacts" && (
           <ContactsSection />
