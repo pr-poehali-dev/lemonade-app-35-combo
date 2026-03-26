@@ -1,149 +1,17 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
-
-const LEMONADE_IMG = "https://cdn.poehali.dev/projects/13bf98c5-75eb-4faf-9dcf-ca215771ed40/files/0c493cbe-0fe5-41a0-af1d-ce4170dfc85d.jpg";
-const COMBO_IMG = "https://cdn.poehali.dev/projects/13bf98c5-75eb-4faf-9dcf-ca215771ed40/files/dbf8201c-6769-47a9-84d5-6b3bcb7a8707.jpg";
-const CHIPS_IMG = "https://cdn.poehali.dev/projects/13bf98c5-75eb-4faf-9dcf-ca215771ed40/files/63a82200-7552-4798-86e8-ae118e6c72d1.jpg";
-
-const PRODUCTS = [
-  {
-    id: 1,
-    name: "Лимонад",
-    desc: "Освежающий домашний лимонад с мятой и льдом",
-    price: 35,
-    image: LEMONADE_IMG,
-    emoji: "🍋",
-    tag: "Хит",
-    tagColor: "bg-lemon text-[#1A1A0F]",
-  },
-  {
-    id: 4,
-    name: "Лимонад (½ порции)",
-    desc: "Тот же свежий лимонад, только поменьше — в самый раз",
-    price: 25,
-    image: LEMONADE_IMG,
-    emoji: "🍋",
-    tag: "Мини",
-    tagColor: "bg-lemon-light text-[#1A1A0F]",
-  },
-  {
-    id: 2,
-    name: "Чипсы",
-    desc: "Хрустящие золотистые чипсы — идеальный перекус",
-    price: 49,
-    image: CHIPS_IMG,
-    emoji: "🍟",
-    tag: "Новинка",
-    tagColor: "bg-orange-400 text-white",
-  },
-  {
-    id: 3,
-    name: "Комбо: Лимонад + Чипсы",
-    desc: "Идеальный дуэт — холодный лимонад и хрустящие чипсы",
-    price: 80,
-    image: COMBO_IMG,
-    emoji: "🍋🍟",
-    tag: "Выгода",
-    tagColor: "bg-emerald text-white",
-  },
-];
-
-const INITIAL_REVIEWS = [
-  { id: 1, productId: 1, author: "Аня К.", rating: 5, text: "Лучший лимонад в городе! Очень свежий и ароматный.", date: "12 марта" },
-  { id: 2, productId: 2, author: "Максим Р.", rating: 5, text: "Комбо — просто огонь! Чипсы хрустят, лимонад освежает.", date: "18 марта" },
-  { id: 3, productId: 1, author: "Света В.", rating: 4, text: "Вкусно и быстро, буду брать снова!", date: "22 марта" },
-];
-
-type Review = { id: number; productId: number; author: string; rating: number; text: string; date: string };
-type CartItem = { productId: number; qty: number };
-
-function StarRating({ value, onChange, size = 20 }: { value: number; onChange?: (v: number) => void; size?: number }) {
-  const [hovered, setHovered] = useState(0);
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          className="star-btn"
-          onMouseEnter={() => onChange && setHovered(star)}
-          onMouseLeave={() => onChange && setHovered(0)}
-          onClick={() => onChange?.(star)}
-          style={{ background: "none", border: "none", padding: 2, cursor: onChange ? "pointer" : "default" }}
-        >
-          <span style={{ fontSize: size, color: star <= (hovered || value) ? "#FFD700" : "#D1D5DB" }}>★</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ProductCard({ product, onAdd }: { product: typeof PRODUCTS[0]; onAdd: () => void }) {
-  return (
-    <div className="card-hover bg-white rounded-3xl overflow-hidden shadow-md border border-yellow-100 flex flex-col">
-      <div className="relative h-52 overflow-hidden bg-yellow-50">
-        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-        <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold ${product.tagColor} shadow`}>
-          {product.tag}
-        </span>
-      </div>
-      <div className="p-5 flex flex-col flex-1">
-        <h3 className="font-golos font-bold text-lg text-[#1A1A0F] leading-snug mb-1">{product.name}</h3>
-        <p className="text-muted-foreground text-sm mb-4 flex-1">{product.desc}</p>
-        <div className="flex items-center justify-between mt-auto">
-          <span className="font-pacifico text-2xl text-[#F9A825]">{product.price}₽</span>
-          <button
-            onClick={onAdd}
-            className="btn-press bg-lemon hover:bg-lemon-dark text-[#1A1A0F] font-bold py-2 px-5 rounded-2xl flex items-center gap-2 transition-colors shadow-sm"
-          >
-            <Icon name="Plus" size={16} />
-            В корзину
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ReviewCard({ review }: { review: Review }) {
-  const product = PRODUCTS.find((p) => p.id === review.productId);
-  return (
-    <div className="animate-fade-in-up bg-white rounded-2xl p-5 shadow-sm border border-yellow-100">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-lemon flex items-center justify-center font-bold text-[#1A1A0F] text-sm">
-            {review.author[0]}
-          </div>
-          <div>
-            <p className="font-semibold text-sm text-[#1A1A0F]">{review.author}</p>
-            <p className="text-xs text-muted-foreground">{review.date}</p>
-          </div>
-        </div>
-        <StarRating value={review.rating} size={15} />
-      </div>
-      {product && (
-        <p className="text-xs text-emerald font-semibold mb-1">{product.emoji} {product.name}</p>
-      )}
-      <p className="text-sm text-[#333]">{review.text}</p>
-    </div>
-  );
-}
+import { type CartItem } from "@/components/shared/data";
+import MenuSection from "@/components/MenuSection";
+import CartSection from "@/components/CartSection";
+import ContactsSection from "@/components/ContactsSection";
 
 export default function Index() {
   const [section, setSection] = useState<"menu" | "cart" | "contacts">("menu");
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [reviews, setReviews] = useState<Review[]>(INITIAL_REVIEWS);
-  const [newReview, setNewReview] = useState({ productId: 1, author: "", rating: 5, text: "" });
-  const [reviewSuccess, setReviewSuccess] = useState(false);
   const [cartBounce, setCartBounce] = useState(false);
   const [addedId, setAddedId] = useState<number | null>(null);
-  const [filterProduct, setFilterProduct] = useState<number | "all">("all");
 
   const totalQty = cart.reduce((s, i) => s + i.qty, 0);
-  const totalPrice = cart.reduce((s, i) => {
-    const p = PRODUCTS.find((pr) => pr.id === i.productId);
-    return s + (p?.price || 0) * i.qty;
-  }, 0);
 
   const addToCart = (productId: number) => {
     setCart((prev) => {
@@ -165,29 +33,6 @@ export default function Index() {
     setCart((prev) => prev.map((i) =>
       i.productId === productId ? { ...i, qty: Math.max(1, i.qty + delta) } : i
     ));
-  };
-
-  const submitReview = () => {
-    if (!newReview.author.trim() || !newReview.text.trim()) return;
-    const today = new Date();
-    const date = `${today.getDate()} ${["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"][today.getMonth()]}`;
-    setReviews((prev) => [
-      { id: Date.now(), ...newReview, date },
-      ...prev,
-    ]);
-    setNewReview({ productId: 1, author: "", rating: 5, text: "" });
-    setReviewSuccess(true);
-    setTimeout(() => setReviewSuccess(false), 3000);
-  };
-
-  const filteredReviews = filterProduct === "all"
-    ? reviews
-    : reviews.filter((r) => r.productId === filterProduct);
-
-  const avgRating = (productId: number) => {
-    const r = reviews.filter((rv) => rv.productId === productId);
-    if (!r.length) return 0;
-    return r.reduce((s, rv) => s + rv.rating, 0) / r.length;
   };
 
   return (
@@ -235,265 +80,20 @@ export default function Index() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-
-        {/* ===== МЕНЮ ===== */}
         {section === "menu" && (
-          <div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
-              {PRODUCTS.map((p) => (
-                <div key={p.id} className="relative">
-                  {addedId === p.id && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-                      <div className="animate-pop-in bg-emerald text-white font-bold px-6 py-3 rounded-2xl shadow-lg text-lg">
-                        ✓ Добавлено!
-                      </div>
-                    </div>
-                  )}
-                  <ProductCard product={p} onAdd={() => addToCart(p.id)} />
-                </div>
-              ))}
-            </div>
-
-            {/* Отзывы */}
-            <div>
-              <div className="flex items-center gap-3 mb-5 flex-wrap">
-                <h2 className="font-pacifico text-2xl text-[#1A1A0F]">Отзывы</h2>
-                <div className="flex gap-2">
-                  {[{ label: "Все", val: "all" as const }, ...PRODUCTS.map((p) => ({ label: p.emoji, val: p.id }))].map(({ label, val }) => (
-                    <button
-                      key={String(val)}
-                      onClick={() => setFilterProduct(val)}
-                      className={`px-3 py-1 rounded-full text-sm font-semibold btn-press transition-colors ${
-                        filterProduct === val ? "bg-lemon text-[#1A1A0F]" : "bg-white text-muted-foreground border border-yellow-100"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Средние оценки */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {PRODUCTS.map((p) => (
-                  <div key={p.id} className="bg-white rounded-2xl p-4 border border-yellow-100 flex items-center gap-3">
-                    <span className="text-2xl">{p.emoji}</span>
-                    <div>
-                      <p className="font-semibold text-sm text-[#1A1A0F]">{p.name.split(":")[0]}</p>
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <StarRating value={Math.round(avgRating(p.id))} size={14} />
-                        <span className="text-xs text-muted-foreground">
-                          {avgRating(p.id).toFixed(1)} ({reviews.filter(r => r.productId === p.id).length})
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Форма отзыва */}
-              <div className="bg-white rounded-3xl p-6 border border-yellow-100 shadow-sm mb-5">
-                <h3 className="font-golos font-bold text-base text-[#1A1A0F] mb-4 flex items-center gap-2">
-                  <Icon name="MessageSquarePlus" size={18} />
-                  Оставить отзыв
-                </h3>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      value={newReview.author}
-                      onChange={(e) => setNewReview((r) => ({ ...r, author: e.target.value }))}
-                      placeholder="Ваше имя"
-                      className="border border-yellow-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-lemon bg-yellow-50/50"
-                    />
-                    <select
-                      value={newReview.productId}
-                      onChange={(e) => setNewReview((r) => ({ ...r, productId: Number(e.target.value) }))}
-                      className="border border-yellow-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-lemon bg-yellow-50/50"
-                    >
-                      {PRODUCTS.map((p) => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-[#1A1A0F]">Оценка:</span>
-                    <StarRating value={newReview.rating} onChange={(v) => setNewReview((r) => ({ ...r, rating: v }))} />
-                  </div>
-                  <textarea
-                    value={newReview.text}
-                    onChange={(e) => setNewReview((r) => ({ ...r, text: e.target.value }))}
-                    placeholder="Расскажите о вашем впечатлении..."
-                    rows={3}
-                    className="w-full border border-yellow-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-lemon bg-yellow-50/50 resize-none"
-                  />
-                  <button
-                    onClick={submitReview}
-                    className="btn-press w-full bg-emerald hover:bg-emerald-dark text-white font-bold py-3 rounded-2xl transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Icon name="Send" size={16} />
-                    Отправить отзыв
-                  </button>
-                  {reviewSuccess && (
-                    <div className="animate-pop-in bg-emerald/10 text-emerald-dark text-sm font-semibold rounded-xl py-2.5 px-4 text-center">
-                      🎉 Спасибо! Ваш отзыв опубликован.
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {filteredReviews.map((r) => (
-                  <ReviewCard key={r.id} review={r} />
-                ))}
-              </div>
-            </div>
-          </div>
+          <MenuSection addToCart={addToCart} addedId={addedId} />
         )}
-
-        {/* ===== КОРЗИНА ===== */}
         {section === "cart" && (
-          <div>
-            <h2 className="font-pacifico text-3xl text-[#1A1A0F] mb-6">Корзина</h2>
-            {cart.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="text-6xl mb-4">🛒</div>
-                <p className="text-muted-foreground font-semibold text-lg mb-4">Корзина пуста</p>
-                <button
-                  onClick={() => setSection("menu")}
-                  className="btn-press bg-lemon text-[#1A1A0F] font-bold px-8 py-3 rounded-2xl transition-colors"
-                >
-                  Перейти в меню
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div className="space-y-4 mb-6">
-                  {cart.map((item) => {
-                    const product = PRODUCTS.find((p) => p.id === item.productId)!;
-                    return (
-                      <div key={item.productId} className="animate-fade-in-up bg-white rounded-2xl p-4 border border-yellow-100 shadow-sm flex items-center gap-4">
-                        <img src={product.image} alt={product.name} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-[#1A1A0F] text-sm truncate">{product.name}</p>
-                          <p className="text-muted-foreground text-xs">{product.price}₽ × {item.qty}</p>
-                          <p className="font-bold text-emerald-dark text-sm">{product.price * item.qty}₽</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => changeQty(item.productId, -1)} className="btn-press w-8 h-8 rounded-xl bg-yellow-50 border border-yellow-200 flex items-center justify-center font-bold text-[#1A1A0F] transition-colors hover:bg-lemon">
-                            <Icon name="Minus" size={14} />
-                          </button>
-                          <span className="w-5 text-center font-bold text-[#1A1A0F]">{item.qty}</span>
-                          <button onClick={() => changeQty(item.productId, 1)} className="btn-press w-8 h-8 rounded-xl bg-yellow-50 border border-yellow-200 flex items-center justify-center font-bold text-[#1A1A0F] transition-colors hover:bg-lemon">
-                            <Icon name="Plus" size={14} />
-                          </button>
-                          <button onClick={() => removeFromCart(item.productId)} className="btn-press w-8 h-8 rounded-xl bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center ml-1 transition-colors">
-                            <Icon name="Trash2" size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-yellow-100 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-semibold text-[#1A1A0F]">Итого:</span>
-                    <span className="font-pacifico text-3xl text-[#F9A825]">{totalPrice}₽</span>
-                  </div>
-                  <button className="btn-press w-full bg-emerald hover:bg-emerald-dark text-white font-bold py-4 rounded-2xl text-lg transition-colors flex items-center justify-center gap-2 shadow-md">
-                    <Icon name="CreditCard" size={20} />
-                    Оформить заказ
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <CartSection
+            cart={cart}
+            onGoToMenu={() => setSection("menu")}
+            onRemove={removeFromCart}
+            onChangeQty={changeQty}
+          />
         )}
-
-        {/* ===== КОНТАКТЫ ===== */}
         {section === "contacts" && (
-          <div>
-            <h2 className="font-pacifico text-3xl text-[#1A1A0F] mb-6">Контакты</h2>
-            <div className="space-y-4">
-              {[
-                { icon: "MapPin", label: "Адрес", value: "Волгоград, Кировский р-н, Гжатский пер., 19", color: "bg-lemon/20 text-lemon-dark", href: null },
-                { icon: "Phone", label: "Телефон", value: "+7 (996) 492-52-46", color: "bg-emerald/20 text-emerald-dark", href: "tel:+79964925246" },
-                { icon: "Clock", label: "Часы работы", value: "Пн–Вс: 10:00 – 22:00", color: "bg-orange-100 text-orange-500", href: null },
-                { icon: "Instagram", label: "Instagram", value: "@lemonade_fon", color: "bg-pink-100 text-pink-500", href: null },
-                { icon: "MessageCircle", label: "WhatsApp", value: "Написать в WhatsApp", color: "bg-green-100 text-green-600", href: "https://wa.me/79964925246" },
-                { icon: "Send", label: "Telegram", value: "Написать в Telegram", color: "bg-sky-100 text-sky-500", href: "https://t.me/+79964925246" },
-              ].map(({ icon, label, value, color, href }) => (
-                <div key={label} className="animate-fade-in-up bg-white rounded-2xl p-5 border border-yellow-100 shadow-sm flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center flex-shrink-0`}>
-                    <Icon name={icon as "MapPin"} size={22} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium mb-0.5">{label}</p>
-                    {href ? (
-                      <a href={href} className="font-bold text-emerald-dark hover:underline">{value}</a>
-                    ) : (
-                      <p className="font-bold text-[#1A1A0F]">{value}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {/* Google Maps */}
-              <div className="animate-fade-in-up bg-white rounded-3xl overflow-hidden border border-yellow-100 shadow-sm">
-                <div className="px-5 pt-5 pb-3 flex items-center gap-2">
-                  <Icon name="Map" size={18} className="text-lemon-dark" />
-                  <span className="font-golos font-bold text-base text-[#1A1A0F]">Мы на карте</span>
-                </div>
-                <div className="w-full h-64">
-                  <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2731.5!2d44.4825!3d48.5075!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x411735a2c4db3a4b%3A0x0!2z0JPQttCw0YLRgdC60LjQuSDQv9C10YAuLCAxOSwg0JLQvtC70LPQvtCz0YDQsNC00YHQutCw0Y8g0L7QsdC7LiwgNDAwMDY5!5e0!3m2!1sru!2sru!4v1711449600000!5m2!1sru!2sru&q=Волгоград,+Кировский+район,+Гжатский+переулок,+19"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Лемонад фон на карте"
-                  />
-                </div>
-                <div className="px-5 py-3 bg-yellow-50/50 flex items-center gap-2">
-                  <Icon name="Navigation" size={14} />
-                  <a
-                    href="https://maps.google.com/?q=Волгоград,+Кировский+район,+Гжатский+переулок,+19"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-semibold text-emerald-dark hover:underline"
-                  >
-                    Открыть в Google Maps
-                  </a>
-                </div>
-              </div>
-
-              <div className="animate-fade-in-up bg-white rounded-3xl p-6 border border-yellow-100 shadow-sm mt-2">
-                <h3 className="font-golos font-bold text-base text-[#1A1A0F] mb-4 flex items-center gap-2">
-                  <Icon name="MessageCircle" size={18} />
-                  Написать нам
-                </h3>
-                <div className="space-y-3">
-                  <input
-                    placeholder="Ваше имя"
-                    className="w-full border border-yellow-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-lemon bg-yellow-50/50"
-                  />
-                  <textarea
-                    placeholder="Ваше сообщение..."
-                    rows={4}
-                    className="w-full border border-yellow-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-lemon bg-yellow-50/50 resize-none"
-                  />
-                  <button className="btn-press w-full bg-lemon hover:bg-lemon-dark text-[#1A1A0F] font-bold py-3 rounded-2xl transition-colors flex items-center justify-center gap-2">
-                    <Icon name="Send" size={16} />
-                    Отправить
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ContactsSection />
         )}
-
       </div>
 
       {/* Footer */}
