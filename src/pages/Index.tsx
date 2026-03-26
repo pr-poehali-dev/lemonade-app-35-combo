@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 import { PRODUCTS, type CartItem } from "@/components/shared/data";
 import MenuSection from "@/components/MenuSection";
 import CartSection from "@/components/CartSection";
 import ContactsSection from "@/components/ContactsSection";
 import OrdersSection, { type Order } from "@/components/OrdersSection";
-import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 function generateCode() {
   return String(Math.floor(10000 + Math.random() * 90000));
@@ -43,6 +43,25 @@ export default function Index() {
     ));
   };
 
+  const playReadySound = () => {
+    try {
+      const ctx = new AudioContext();
+      const notes = [523, 659, 784];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.3);
+        osc.start(ctx.currentTime + i * 0.18);
+        osc.stop(ctx.currentTime + i * 0.18 + 0.3);
+      });
+    } catch (e) { void e; }
+  };
+
   const updateOrderStatus = (code: string, status: Order["status"]) => {
     setOrders((prev) => prev.map((o) => o.code === code ? { ...o, status } : o));
   };
@@ -68,6 +87,11 @@ export default function Index() {
     setSection("orders");
     statusTimers.current[code] = setTimeout(() => {
       updateOrderStatus(code, "ready");
+      playReadySound();
+      toast.success(`Заказ #${code} готов! 🍋`, {
+        description: "Подойдите на кассу для получения",
+        duration: 8000,
+      });
       statusTimers.current[code] = setTimeout(() => {
         updateOrderStatus(code, "done");
       }, 30000);
