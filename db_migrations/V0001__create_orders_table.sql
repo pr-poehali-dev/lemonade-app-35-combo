@@ -1,0 +1,8 @@
+CREATE TABLE orders (
+  code VARCHAR(5) PRIMARY KEY,
+  items JSONB NOT NULL,
+  total INTEGER NOT NULL,
+  payment VARCHAR(10) NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'preparing',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

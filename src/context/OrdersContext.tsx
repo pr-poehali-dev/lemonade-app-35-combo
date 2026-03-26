@@ -1,20 +1,18 @@
-import { createContext, useContext, useState, useRef, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from "react";
 import { type Order } from "@/components/OrdersSection";
 import { PRODUCTS } from "@/components/shared/data";
 import { toast } from "sonner";
 
+const API = "https://functions.poehali.dev/6165fd1e-3fb7-4fe9-ace3-d8aa97601744";
+
 interface OrdersContextType {
   orders: Order[];
-  placeOrder: (items: { productId: number; qty: number }[], payment: "cash" | "transfer") => void;
-  cancelOrder: (code: string) => void;
-  updateOrderStatus: (code: string, status: Order["status"]) => void;
+  placeOrder: (items: { productId: number; qty: number }[], payment: "cash" | "transfer") => Promise<void>;
+  cancelOrder: (code: string) => Promise<void>;
+  updateOrderStatus: (code: string, status: Order["status"]) => Promise<void>;
 }
 
 const OrdersContext = createContext<OrdersContextType | null>(null);
-
-function generateCode() {
-  return String(Math.floor(10000 + Math.random() * 90000));
-}
 
 function playReadySound() {
   try {
@@ -35,57 +33,77 @@ function playReadySound() {
   } catch (e) { void e; }
 }
 
+function mapOrder(r: Record<string, unknown>): Order {
+  return {
+    code: r.code as string,
+    items: r.items as Order["items"],
+    total: r.total as number,
+    payment: r.payment as Order["payment"],
+    status: r.status as Order["status"],
+    createdAt: r.created_at as string,
+  };
+}
+
 export function OrdersProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<Order[]>([]);
-  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-  const updateOrderStatus = (code: string, status: Order["status"]) => {
-    setOrders((prev) => prev.map((o) => o.code === code ? { ...o, status } : o));
+  const fetchOrders = async () => {
+    const res = await fetch(API);
+    const data = await res.json();
+    setOrders((data as Record<string, unknown>[]).map(mapOrder));
   };
 
-  const placeOrder = (items: { productId: number; qty: number }[], payment: "cash" | "transfer") => {
-    const now = new Date();
+  const prevStatuses = useRef<Record<string, Order["status"]>>({});
+
+  useEffect(() => {
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    orders.forEach((order) => {
+      if (order.status === "ready") {
+        const prev = prevStatuses.current[order.code];
+        if (prev && prev !== "ready") {
+          playReadySound();
+          toast.success(`Заказ #${order.code} готов! 🍋`, {
+            description: "Подойдите на кассу для получения",
+            duration: 8000,
+          });
+        }
+      }
+      prevStatuses.current[order.code] = order.status;
+    });
+  }, [orders]);
+
+  const updateOrderStatus = async (code: string, status: Order["status"]) => {
+    setOrders((prev) => prev.map((o) => o.code === code ? { ...o, status } : o));
+    await fetch(API, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, status }),
+    });
+  };
+
+  const placeOrder = async (items: { productId: number; qty: number }[], payment: "cash" | "transfer") => {
     const total = items.reduce((s, i) => {
       const p = PRODUCTS.find((pr) => pr.id === i.productId);
       return s + (p?.price || 0) * i.qty;
     }, 0);
-    const code = generateCode();
-    const order: Order = {
-      code,
-      items,
-      total,
-      payment,
-      status: "preparing",
-      createdAt:
-        now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) +
-        ", " +
-        now.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }),
-    };
-    setOrders((prev) => [...prev, order]);
-    timers.current[code] = setTimeout(() => {
-      updateOrderStatus(code, "ready");
-      playReadySound();
-      toast.success(`Заказ #${code} готов! 🍋`, {
-        description: "Подойдите на кассу для получения",
-        duration: 8000,
-      });
-      timers.current[code] = setTimeout(() => {
-        updateOrderStatus(code, "done");
-      }, 30000);
-    }, 60000);
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items, total, payment }),
+    });
+    const { code } = await res.json();
+    await fetchOrders();
     return code;
   };
 
-  const cancelOrder = (code: string) => {
-    clearTimeout(timers.current[code]);
-    delete timers.current[code];
-    updateOrderStatus(code, "cancelled");
+  const cancelOrder = async (code: string) => {
+    await updateOrderStatus(code, "cancelled");
   };
-
-  useEffect(() => {
-    const t = timers.current;
-    return () => { Object.values(t).forEach(clearTimeout); };
-  }, []);
 
   return (
     <OrdersContext.Provider value={{ orders, placeOrder, cancelOrder, updateOrderStatus }}>

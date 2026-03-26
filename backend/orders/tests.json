@@ -1,0 +1,13 @@
+{
+  "tests": [
+    {
+      "name": "POST place order",
+      "method": "POST",
+      "path": "/",
+      "body": {"items": [{"productId": 1, "qty": 2}], "total": 70, "payment": "cash"},
+      "expectedStatus": 200,
+      "expectedBody": {"code": "string"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
