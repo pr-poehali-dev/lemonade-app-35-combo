@@ -3,6 +3,7 @@ import Icon from "@/components/ui/icon";
 
 const LEMONADE_IMG = "https://cdn.poehali.dev/projects/13bf98c5-75eb-4faf-9dcf-ca215771ed40/files/0c493cbe-0fe5-41a0-af1d-ce4170dfc85d.jpg";
 const COMBO_IMG = "https://cdn.poehali.dev/projects/13bf98c5-75eb-4faf-9dcf-ca215771ed40/files/dbf8201c-6769-47a9-84d5-6b3bcb7a8707.jpg";
+const CHIPS_IMG = "https://cdn.poehali.dev/projects/13bf98c5-75eb-4faf-9dcf-ca215771ed40/files/63a82200-7552-4798-86e8-ae118e6c72d1.jpg";
 
 const PRODUCTS = [
   {
@@ -17,6 +18,16 @@ const PRODUCTS = [
   },
   {
     id: 2,
+    name: "Чипсы",
+    desc: "Хрустящие золотистые чипсы — идеальный перекус",
+    price: 49,
+    image: CHIPS_IMG,
+    emoji: "🍟",
+    tag: "Новинка",
+    tagColor: "bg-orange-400 text-white",
+  },
+  {
+    id: 3,
     name: "Комбо: Лимонад + Чипсы",
     desc: "Идеальный дуэт — холодный лимонад и хрустящие чипсы",
     price: 80,
