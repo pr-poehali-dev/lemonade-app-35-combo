@@ -8,7 +8,7 @@ export default function ContactsSection() {
         {[
           { icon: "MapPin", label: "Адрес", value: "Волгоград, Кировский р-н, Гжатский пер., 19", color: "bg-lemon/20 text-lemon-dark", href: null },
           { icon: "Phone", label: "Телефон", value: "+7 (996) 492-52-46", color: "bg-emerald/20 text-emerald-dark", href: "tel:+79964925246" },
-          { icon: "Clock", label: "Часы работы", value: "Пн–Вс: 10:00 – 22:00", color: "bg-orange-100 text-orange-500", href: null },
+          { icon: "Clock", label: "Часы работы", value: "Пн–Вс: 10:00 – 17:00", color: "bg-orange-100 text-orange-500", href: null },
           { icon: "Instagram", label: "Instagram", value: "@lemonade_fon", color: "bg-pink-100 text-pink-500", href: null },
           { icon: "MessageCircle", label: "WhatsApp", value: "Написать в WhatsApp", color: "bg-green-100 text-green-600", href: "https://wa.me/79964925246" },
           { icon: "Send", label: "Telegram", value: "Написать в Telegram", color: "bg-sky-100 text-sky-500", href: "https://t.me/+79964925246" },
