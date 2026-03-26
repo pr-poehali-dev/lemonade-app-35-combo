@@ -1,24 +1,19 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
-import { PRODUCTS, type CartItem } from "@/components/shared/data";
+import { type CartItem } from "@/components/shared/data";
 import MenuSection from "@/components/MenuSection";
 import CartSection from "@/components/CartSection";
 import ContactsSection from "@/components/ContactsSection";
-import OrdersSection, { type Order } from "@/components/OrdersSection";
-import { toast } from "sonner";
-
-function generateCode() {
-  return String(Math.floor(10000 + Math.random() * 90000));
-}
+import OrdersSection from "@/components/OrdersSection";
+import { useOrders } from "@/context/OrdersContext";
 
 export default function Index() {
   const [section, setSection] = useState<"menu" | "cart" | "contacts" | "orders">("menu");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartBounce, setCartBounce] = useState(false);
   const [addedId, setAddedId] = useState<number | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const statusTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
+  const { orders, placeOrder, cancelOrder } = useOrders();
   const totalQty = cart.reduce((s, i) => s + i.qty, 0);
 
   const addToCart = (productId: number) => {
@@ -43,76 +38,15 @@ export default function Index() {
     ));
   };
 
-  const playReadySound = () => {
-    try {
-      const ctx = new AudioContext();
-      const notes = [523, 659, 784];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = "sine";
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.18);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.3);
-        osc.start(ctx.currentTime + i * 0.18);
-        osc.stop(ctx.currentTime + i * 0.18 + 0.3);
-      });
-    } catch (e) { void e; }
-  };
-
-  const updateOrderStatus = (code: string, status: Order["status"]) => {
-    setOrders((prev) => prev.map((o) => o.code === code ? { ...o, status } : o));
-  };
-
-  const placeOrder = (payment: "cash" | "transfer") => {
-    const now = new Date();
-    const total = cart.reduce((s, i) => {
-      const p = PRODUCTS.find((pr) => pr.id === i.productId);
-      return s + (p?.price || 0) * i.qty;
-    }, 0);
-    const code = generateCode();
-    const order: Order = {
-      code,
-      items: [...cart],
-      total,
-      payment,
-      createdAt: now.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) + ", " +
-        now.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }),
-      status: "preparing",
-    };
-    setOrders((prev) => [...prev, order]);
+  const handlePlaceOrder = (payment: "cash" | "transfer") => {
+    placeOrder(cart, payment);
     setCart([]);
     setSection("orders");
-    statusTimers.current[code] = setTimeout(() => {
-      updateOrderStatus(code, "ready");
-      playReadySound();
-      toast.success(`Заказ #${code} готов! 🍋`, {
-        description: "Подойдите на кассу для получения",
-        duration: 8000,
-      });
-      statusTimers.current[code] = setTimeout(() => {
-        updateOrderStatus(code, "done");
-      }, 30000);
-    }, 60000);
   };
-
-  const cancelOrder = (code: string) => {
-    clearTimeout(statusTimers.current[code]);
-    delete statusTimers.current[code];
-    updateOrderStatus(code, "cancelled");
-  };
-
-  useEffect(() => {
-    const timers = statusTimers.current;
-    return () => { Object.values(timers).forEach(clearTimeout); };
-  }, []);
 
   return (
     <div className="min-h-screen font-golos" style={{ background: "linear-gradient(135deg, #FFFDE7 0%, #F0FFF4 100%)" }}>
 
-      {/* Hero */}
       <div className="relative overflow-hidden noise-overlay" style={{ background: "linear-gradient(135deg, #FFD700 0%, #FFF176 50%, #2ECC71 100%)" }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 2px 2px, #1A1A0F 1px, transparent 0)", backgroundSize: "32px 32px" }} />
         <div className="relative max-w-2xl mx-auto px-6 pt-14 pb-10 text-center">
@@ -122,7 +56,6 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Nav */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-yellow-100 shadow-sm">
         <div className="max-w-2xl mx-auto px-4">
           <div className="flex items-center gap-1 py-2">
@@ -160,27 +93,22 @@ export default function Index() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {section === "menu" && (
-          <MenuSection addToCart={addToCart} addedId={addedId} />
-        )}
+        {section === "menu" && <MenuSection addToCart={addToCart} addedId={addedId} />}
         {section === "cart" && (
           <CartSection
             cart={cart}
             onGoToMenu={() => setSection("menu")}
             onRemove={removeFromCart}
             onChangeQty={changeQty}
-            onPlaceOrder={placeOrder}
+            onPlaceOrder={handlePlaceOrder}
           />
         )}
         {section === "orders" && (
           <OrdersSection orders={orders} onGoToMenu={() => setSection("menu")} onCancelOrder={cancelOrder} />
         )}
-        {section === "contacts" && (
-          <ContactsSection />
-        )}
+        {section === "contacts" && <ContactsSection />}
       </div>
 
-      {/* Footer */}
       <div className="text-center py-8 text-muted-foreground text-sm">
         <span className="font-pacifico text-lemon-dark text-base">Лемонад фон</span>
         <span className="mx-2">·</span>
