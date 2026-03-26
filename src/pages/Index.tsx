@@ -395,18 +395,22 @@ export default function Index() {
             <h2 className="font-pacifico text-3xl text-[#1A1A0F] mb-6">Контакты</h2>
             <div className="space-y-4">
               {[
-                { icon: "MapPin", label: "Адрес", value: "Волгоград, Кировский р-н, Гжатский пер., 19", color: "bg-lemon/20 text-lemon-dark" },
-                { icon: "Phone", label: "Телефон", value: "+7 (996) 492-52-46", color: "bg-emerald/20 text-emerald-dark" },
-                { icon: "Clock", label: "Часы работы", value: "Пн–Вс: 10:00 – 22:00", color: "bg-orange-100 text-orange-500" },
-                { icon: "Instagram", label: "Instagram", value: "@lemonade_fon", color: "bg-pink-100 text-pink-500" },
-              ].map(({ icon, label, value, color }) => (
+                { icon: "MapPin", label: "Адрес", value: "Волгоград, Кировский р-н, Гжатский пер., 19", color: "bg-lemon/20 text-lemon-dark", href: null },
+                { icon: "Phone", label: "Телефон", value: "+7 (996) 492-52-46", color: "bg-emerald/20 text-emerald-dark", href: "tel:+79964925246" },
+                { icon: "Clock", label: "Часы работы", value: "Пн–Вс: 10:00 – 22:00", color: "bg-orange-100 text-orange-500", href: null },
+                { icon: "Instagram", label: "Instagram", value: "@lemonade_fon", color: "bg-pink-100 text-pink-500", href: null },
+              ].map(({ icon, label, value, color, href }) => (
                 <div key={label} className="animate-fade-in-up bg-white rounded-2xl p-5 border border-yellow-100 shadow-sm flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center flex-shrink-0`}>
                     <Icon name={icon as "MapPin"} size={22} />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium mb-0.5">{label}</p>
-                    <p className="font-bold text-[#1A1A0F]">{value}</p>
+                    {href ? (
+                      <a href={href} className="font-bold text-emerald-dark hover:underline">{value}</a>
+                    ) : (
+                      <p className="font-bold text-[#1A1A0F]">{value}</p>
+                    )}
                   </div>
                 </div>
               ))}
