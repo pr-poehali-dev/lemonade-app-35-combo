@@ -17,6 +17,16 @@ const PRODUCTS = [
     tagColor: "bg-lemon text-[#1A1A0F]",
   },
   {
+    id: 4,
+    name: "Лимонад (½ порции)",
+    desc: "Тот же свежий лимонад, только поменьше — в самый раз",
+    price: 25,
+    image: LEMONADE_IMG,
+    emoji: "🍋",
+    tag: "Мини",
+    tagColor: "bg-lemon-light text-[#1A1A0F]",
+  },
+  {
     id: 2,
     name: "Чипсы",
     desc: "Хрустящие золотистые чипсы — идеальный перекус",
